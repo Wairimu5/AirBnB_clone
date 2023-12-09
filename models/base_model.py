@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-Module for BaseModel class.
+Defines the base model
 """
 import uuid
 from datetime import datetime
@@ -8,42 +8,46 @@ from datetime import datetime
 
 class BaseModel:
     """
-    Base class for all models in the AirBnB clone project.
+    Defines all common attributes and methods for other classes
     """
     def __init__(self, *args, **kwargs):
         """
-        Initializes a new instance of BaseModel.
+        Initializes an instance
         """
-        if kwargs:
-            for key, value in kwargs.items():
-                if key == "created_at" or key == "updated_at":
-                    value = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
-                if key != "__class__":
-                    setattr(self, key, value)
+        if kwargs is not None and len(kwargs) != 0:
+            if '__class__' in kwargs:
+                del kwargs['__class__']
+            kwargs['created_at'] = datetime.fromisoformat(kwargs['created_at'])
+            kwargs['updated_at'] = datetime.fromisoformat(kwargs['updated_at'])
+            self.__dict__.update(kwargs)
         else:
             self.id = str(uuid.uuid4())
             self.created_at = datetime.now()
             self.updated_at = datetime.now()
-
-    def to_dict(self):
-        """
-        Returns a dictionary representation of the instance.
-        """
-        result = dict(self.__dict__)
-        result['__class__'] = self.__class__.__name__
-        result['created_at'] = self.created_at.isoformat()
-        result['updated_at'] = self.updated_at.isoformat()
-        return result
+            from .__init__ import storage
+            storage.new(self)
 
     def __str__(self):
         """
-        Returns a string representation of the instance.
+        String representation when instance is printed
         """
-        return "[{}] ({}) {}".format(
-            self.__class__.__name__, self.id, self.__dict__)
+        return f"[{type(self).__name__}] ({self.id}) {self.__dict__}"
 
     def save(self):
         """
-        Updates the public instance attribute with the current datetime.
+        Save updates to an instance
         """
-        self.updated_at = datetime.now()
+        self.__dict__.update({'updated_at': datetime.now()})
+        from .__init__ import storage
+        storage.save()
+
+    def to_dict(self):
+        """
+        Returns a dictionary representation of an instance
+        """
+        disdict = dict(self.__dict__)
+        disdict.update({'__class__': type(self).__name__,
+                        'updated_at': self.updated_at.isoformat(),
+                        'id': self.id,
+                        'created_at': self.created_at.isoformat()})
+        return disdict
