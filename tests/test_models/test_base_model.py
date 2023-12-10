@@ -5,7 +5,6 @@ Test suite for base_model
 import unittest
 from models.base_model import BaseModel
 from datetime import datetime
-import uuid
 
 
 class TestBaseModel(unittest.TestCase):
@@ -17,39 +16,40 @@ class TestBaseModel(unittest.TestCase):
         checks the string output of an instance
         """
         base = BaseModel()
-        self.assertEqual(base.__str__(),
-                         f"[{type(base).__name__}] \
-({base.id}) {base.__dict__}")
+        expected_output = (
+            f"[{type(base).__name__}] "
+            f"({base.id}) {base.__dict__}"
+        )
+        self.assertEqual(base.__str__(), expected_output)
 
     def test_to_dict(self):
-    """
-    checks the to_dict() function of an instance
-    """
-    base = BaseModel()
-    prev_time = base.updated_at
-    base_dict = base.to_dict()
+        """
+        checks the to_dict() function of an instance
+        """
+        base = BaseModel()
+        prev_time = base.updated_at
+        base_dict = base.to_dict()
 
-    # Check if '__class__' key exists and its value is correct
-    self.assertIn('__class__', base_dict)
-    self.assertEqual(base_dict['__class__'], type(base).__name__)
+        # Check if '__class__' key exists and its value is correct
+        self.assertIn('__class__', base_dict)
+        self.assertEqual(base_dict['__class__'], type(base).__name__)
 
-    # Check if 'updated_at' and 'created_at' are formatted as expected
-    self.assertIn('updated_at', base_dict)
-    self.assertEqual(base_dict['updated_at'], base.updated_at.isoformat())
-    self.assertIn('created_at', base_dict)
-    self.assertEqual(base_dict['created_at'], base.created_at.isoformat())
+        # Check if 'updated_at' and 'created_at' are formatted as expected
+        self.assertIn('updated_at', base_dict)
+        self.assertEqual(base_dict['updated_at'], base.updated_at.isoformat())
+        self.assertIn('created_at', base_dict)
+        self.assertEqual(base_dict['created_at'], base.created_at.isoformat())
 
-    # Check if 'id' key exists and its value is correct
-    self.assertIn('id', base_dict)
-    self.assertEqual(base_dict['id'], base.id)
+        # Check if 'id' key exists and its value is correct
+        self.assertIn('id', base_dict)
+        self.assertEqual(base_dict['id'], base.id)
 
-    base.save()
-    self.assertNotEqual(prev_time, base.updated_at)
-
+        base.save()
+        self.assertNotEqual(prev_time, base.updated_at)
 
     def test_attr_classes(self):
         """
-        checks if the right classes were use to generate attributes
+        checks if the right classes were used to generate attributes
         """
         base = BaseModel()
         base2 = BaseModel()
